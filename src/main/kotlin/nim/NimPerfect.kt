@@ -1,5 +1,12 @@
 package nim
 
+/**
+ *  Implementation of Nim with XOR-Algorithm
+ *
+ * @property board Nim board
+ * @property history history of boards
+ * @property currentPlayer current player
+ */
 class NimPerfect(
         override val board: IntArray,
         override val history: List<IntArray> = listOf(board),
@@ -12,7 +19,7 @@ class NimPerfect(
     /**
      * Do move and return new game
      *
-     * @param move [Move] Move to do
+     * @param [move] move to perform
      * @return new game with applied move
      */
     override fun move(move: Move): NimGame {
@@ -28,7 +35,7 @@ class NimPerfect(
     /**
      * Undo a number of moves
      *
-     * @param number [Int] Number of moves to undo
+     * @param [number] number of moves to undo
      * @return new game with undone moves
      */
     override fun undoMove(number: Int): NimGame {
@@ -41,15 +48,15 @@ class NimPerfect(
      * Get best possible move
      * If player can not win we return a random move
      *
-     * @return bestMove [Move] Best possible or random move
+     * @return [bestMove] best possible or random move
      */
     override fun bestMove(): Move = this.recBestMove()
 
     /**
      * See bestMove()
      *
-     * @param moves [List<Move>] Possible moves
-     * @return bestMove [Move] Best possible or random move
+     * @param [moves] possible moves
+     * @return [bestMove] possible or random move
      */
     private tailrec fun recBestMove(moves: List<Move> = this.getPossibleMoves()): Move {
         val move: Move = moves.random()

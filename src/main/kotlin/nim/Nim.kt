@@ -1,5 +1,12 @@
 package nim
 
+/**
+ *  Implementation of Nim with Minimax-Algorithm
+ *
+ * @property board Nim board
+ * @property history history of boards
+ * @property currentPlayer current player
+ */
 class Nim(
         override val board: IntArray,
         override val history: List<IntArray> = listOf(board),
@@ -8,7 +15,7 @@ class Nim(
     /**
      * Do move and return new game
      *
-     * @param move [Move] Move to do
+     * @param [move] move to perform
      * @return new game with applied move
      */
     override fun move(move: Move): NimGame {
@@ -24,7 +31,7 @@ class Nim(
     /**
      * Undo a number of moves
      *
-     * @param number [Int] Number of moves to undo
+     * @param [number] number of moves to undo
      * @return new game with undone moves
      */
     override fun undoMove(number: Int): NimGame {
@@ -44,8 +51,8 @@ class Nim(
     /**
      * See bestMove()
      *
-     * @param possibleMoves [List<Move>] List of possible moves
-     * @param winMoves [List<Move>] List of moves that guarantee a win
+     * @param [possibleMoves] list of possible moves
+     * @param [winMoves] list of moves that guarantee a win
      * @return best possible or random move
      */
     private tailrec fun recBestMove(possibleMoves: List<Move> = this.getPossibleMoves(), winMoves: List<Move> = listOf()): Move {
@@ -84,7 +91,7 @@ class Nim(
      * Evaluate current game board for Minimax algorithm
      * If we have a winning position / best move we return a random value to get a random best move later on
      *
-     * @param depth [Int] Current tree depth
+     * @param [depth] current tree depth
      * @return score of board
      */
     override fun evaluate(depth: Int): Int = -this.currentPlayer * (depth + 1)

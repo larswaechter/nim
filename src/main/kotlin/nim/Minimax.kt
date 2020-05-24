@@ -4,6 +4,8 @@ import kotlin.math.abs
 
 /**
  * Interface for implementing Minimax algorithm in two-player zero-sum games
+ * @param [Game] the type of a game
+ * @param [Move] the type of a move
  */
 interface Minimax<Game, Move> {
     /**
@@ -37,7 +39,7 @@ interface Minimax<Game, Move> {
     /**
      * Do move and return new game
      *
-     * @param move [Move] Move to do
+     * @param [move] move to perform
      * @return new game with applied move
      */
     fun move(move: Move): Game
@@ -45,7 +47,7 @@ interface Minimax<Game, Move> {
     /**
      * Undo a number of moves
      *
-     * @param number [Int] Number of moves to undo
+     * @param [number] number of moves to undo
      * @return new game with undone moves
      */
     fun undoMove(number: Int): Game
@@ -53,17 +55,17 @@ interface Minimax<Game, Move> {
     /**
      * Pick random move from possible moves list
      *
-     * @return Random move
+     * @return a random move
      */
     fun getRandomMove(): Move = this.getPossibleMoves().random()
 
     /**
      * Minimax algorithm that finds best move
      *
-     * @param game [Minimax<Game, Move>] Game
-     * @param depth [Int] Maximal tree depth
-     * @param maximize [Boolean] maximize or minimize
-     * @param storedBoards [HashMap<Int, Triple<Move?, Float, Boolean>>] Boards with evaluated best move & score
+     * @param [game]
+     * @param [depth] maximal tree depth
+     * @param [maximize] maximize or minimize
+     * @param [storedBoards] boards with evaluated best move & score
      * @return triple of (Move, Score, WasGoodMove)
      */
     fun minimax(
