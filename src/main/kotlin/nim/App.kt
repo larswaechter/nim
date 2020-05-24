@@ -3,8 +3,15 @@ package nim
 import kotlin.random.Random
 
 fun main() {
-    runTests()
-    // startGame()
+    // runTests()
+    // return
+    // val game: NimGame = Nim(intArrayOf(1,2,3,4,5))
+    // println(game.bestMove())
+    // val s = System.currentTimeMillis()
+    // println(100 + Random.nextInt(1, 50))
+    // println(System.currentTimeMillis() - s)
+
+    startGame()
 }
 
 fun startGame() {
@@ -13,9 +20,15 @@ fun startGame() {
      */
     var opponentInput = "";
     do {
-        println("Choose your opponent Nim (1) or NimPerfect (2):")
+        println("Choose your opponent Nim (1) or NimPerfect (2) or run tests (t):")
         opponentInput = readLine()!!
-    } while (!opponentInput.matches(Regex("[12]")))
+    } while (!opponentInput.matches(Regex("[12t]")))
+
+    if (opponentInput == "t") {
+        runTests()
+        return
+    }
+
     val opponent = opponentInput.toInt()
 
     /**
@@ -62,7 +75,7 @@ fun startGame() {
         } else {
             // Human player
             if (game.currentPlayer == 1) {
-                println("Who should play your move? You (1) or NPC (2) or Undo (3):")
+                println("Who should play your move? You (1) or NPC (2) or undo (3):")
                 when (readLine()!!) {
                     // Human
                     "1" -> {
@@ -94,21 +107,21 @@ fun runTests() {
     var stats: Pair<Int, Int> = Pair(0, 0)
 
     for (i in 1..40) {
-        // var game: NimGame = Nim(intArrayOf(3, 1, 2, 3))
-        // var game: NimGame = Nim(board = intArrayOf(5, 1, 3, 5))
-
         // Pick random starting player and create random board
-        val startingPlayer = if (Random.nextInt(1, 101) % 2 == 0) 1 else -1
-        val randomBoard: IntArray = createRandomBoard()
+        val startingPlayer = if (Random.nextInt(100) % 2 == 0) 1 else -1
+        val randomBoard = createRandomBoard()
 
-        // Init game
+        // Init game -> Check if we expect a win for starting player
         var game: NimGame = Nim(board = randomBoard, currentPlayer = startingPlayer)
         val expectWin = NimPerfect.isWinningPosition(game.board)
-        var counter = 0;
 
-        println("Starting test game #${i} - This may take a while...")
+        // Set Nim or NimPerfect as starter
+        var counter = if (startingPlayer == 1) 1 else 0;
+
+        // Simulate game
+        println("\nStarting test game #${i} - This may take a while...")
         println("Board: ${randomBoard.joinToString()}")
-        println("Expected winner: Player ${if(expectWin) startingPlayer else -startingPlayer}")
+        println("Expected winner: Player ${if (expectWin) startingPlayer else -startingPlayer}")
 
         // We alternate between Nim and NimPerfect after each move
         while (!game.isGameOver()) {
@@ -123,20 +136,21 @@ fun runTests() {
         }
 
         // Update stats
-        println("Player ${game.getWinner()} won!\n")
         stats = if (game.getWinner() == 1) Pair(stats.first + 1, stats.second) else Pair(stats.first, stats.second + 1)
 
-        // Check here, if the wrong player has won
+        // Check here, if the right player has won
         if ((expectWin && startingPlayer != game.getWinner())) {
             println("Expected player $startingPlayer to win but player ${game.getWinner()} won! Stopping test.")
             break
         } else if (!expectWin && startingPlayer == game.getWinner()) {
             println("Expected player ${-startingPlayer} to win but player ${game.getWinner()} won! Stopping test.")
             break
+        } else {
+            println("Player ${game.getWinner()} won!")
         }
     }
 
-    println("Wins: Player 1 = ${stats.first} / Player -1 = ${stats.second}")
+    println("\nTest finished: Wins: Player 1 = ${stats.first} / Player -1 = ${stats.second}")
 }
 
 fun undoMoves(game: NimGame): NimGame {

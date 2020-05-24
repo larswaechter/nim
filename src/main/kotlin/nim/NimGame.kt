@@ -18,7 +18,7 @@ interface NimGame {
 
     /**
      * If the game is over, the player whose turn not is, has won
-     * since this player did the last move.
+     * since this player did the last / finishing move.
      *
      * @return Player of the game
      */

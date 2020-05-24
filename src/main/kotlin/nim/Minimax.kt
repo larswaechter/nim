@@ -1,9 +1,16 @@
 package nim
 
+import kotlin.math.abs
+
 /**
  * Interface for implementing Minimax algorithm in two-player zero-sum games
  */
 interface Minimax<Game, Move> {
+    /**
+     * Game board
+     */
+    val board: IntArray
+
     /**
      * Evaluate game state for current player.
      *  For player +1, a higher value is better. (maximizer)
@@ -11,7 +18,7 @@ interface Minimax<Game, Move> {
      *
      * @return Positive or negative integer
      */
-    fun evaluate(): Int
+    fun evaluate(depth: Int): Int
 
     /**
      * Get list of all possible moves
@@ -21,18 +28,25 @@ interface Minimax<Game, Move> {
     fun getPossibleMoves(): List<Move>
 
     /**
-     * Check if a player has won or no further moves are possible
-     * @return If game has ended
+     * Check if no more moves are possible
+     *
+     * @return is game over
      */
     fun isGameOver(): Boolean
 
     /**
-     * Do move and switch current player
+     * Do move and return new game
+     *
+     * @param move [Move] Move to do
+     * @return new game with applied move
      */
     fun move(move: Move): Game
 
     /**
      * Undo a number of moves
+     *
+     * @param number [Int] Number of moves to undo
+     * @return new game with undone moves
      */
     fun undoMove(number: Int): Game
 
@@ -46,41 +60,59 @@ interface Minimax<Game, Move> {
     /**
      * Minimax algorithm that finds best move
      *
-     * @param game [Game] Game
-     * @param depth [Int] Tree depth
-     * @param maximize [Boolean] Maximize or Minimize
-     * @param alpha [Float]
-     * @param beta [Float]
-     * @return Pair of (Move, Score)
+     * @param game [Minimax<Game, Move>] Game
+     * @param depth [Int] Maximal tree depth
+     * @param maximize [Boolean] maximize or minimize
+     * @param storedBoards [HashMap<Int, Triple<Move?, Float, Boolean>>] Boards with evaluated best move & score
+     * @return triple of (Move, Score, WasGoodMove)
      */
     fun minimax(
-            game: Game,
+            game: Minimax<Game, Move>,
             depth: Int = this.getPossibleMoves().size,
             maximize: Boolean = true,
-            alpha: Float = Float.NEGATIVE_INFINITY,
-            beta: Float = Float.POSITIVE_INFINITY): Pair<Move?, Float>
-    {
-        if (depth == 0 || (game as Minimax<Game, Move>).isGameOver())
-            return Pair<Move?, Float>(null, (game as Minimax<Game, Move>).evaluate().toFloat())
+            storedBoards: HashMap<Int, Triple<Move?, Float, Boolean>> = HashMap()
+    ): Triple<Move?, Float, Boolean> {
 
-        var minOrMax: Pair<Move?, Float> = Pair(null, if (maximize) alpha else beta)
+        // Recursion anchor -> Evaluate board
+        if (depth == 0 || game.isGameOver()) return Triple(null, game.evaluate(depth).toFloat(), false)
 
-        // Iterate all possible moves
-        for (move in (game as Minimax<Game, Move>).getPossibleMoves()) {
-            var newGame: Game = (game as Minimax<Game, Move>).move(move)
-            val newAlphaBeta: Pair<Float, Float> = if(maximize) Pair(minOrMax.second, beta) else Pair(alpha, minOrMax.second)
+        // Check if board exists in storage
+        val boardSorted: IntArray = game.board.sortedArray()
+        val boardSortedHash: Int = boardSorted.contentHashCode()
 
-            // Call child nodes
-            val child = this.minimax(newGame, depth - 1, !maximize, newAlphaBeta.first, newAlphaBeta.second)
-            val score: Pair<Move?, Float> = Pair(move, child.second)
+        if (storedBoards.containsKey(boardSortedHash)) {
+            val storedBoard = storedBoards[boardSortedHash]!!
+            val scoreAbs: Float = abs(storedBoard.second)
+            val newScore: Float
+
+            // Was best move for storedBoard a good one or not? -> Transform score for current player
+            if (storedBoard.third) newScore = if (maximize) scoreAbs else -scoreAbs
+            else newScore = if (maximize) -scoreAbs else scoreAbs
+
+            return Triple(storedBoard.first, newScore, storedBoard.third)
+        }
+
+        // Call recursively from here on for each move to find best one
+        var minOrMax: Pair<Move?, Float> = Pair(null, if (maximize) Float.NEGATIVE_INFINITY else Float.POSITIVE_INFINITY)
+
+        for (move in game.getPossibleMoves()) {
+            // Apply move - We have to cast here since NimGame prescribes the return type NimGame
+            val newGame: Minimax<Game, Move> = game.move(move) as Minimax<Game, Move>
+
+            val moveScore: Float = this.minimax(newGame, depth - 1, !maximize, storedBoards).second
+            val score: Pair<Move?, Float> = Pair(move, moveScore)
 
             // Check for maximum or minimum
-            if ((maximize && score.second > minOrMax.second) || (!maximize && score.second < minOrMax.second)) {
+            if ((maximize && score.second > minOrMax.second) || (!maximize && score.second < minOrMax.second))
                 minOrMax = score
-                if (maximize && minOrMax.second >= beta) break
-                else if (!maximize && minOrMax.second <= alpha) break
-            }
         }
-        return minOrMax
+
+        // Add best move for current position to storage
+        val wasGoodMove = (maximize && minOrMax.second > 0) || (!maximize && minOrMax.second < 0)
+        val finalMove = Triple(minOrMax.first, minOrMax.second, wasGoodMove)
+
+        storedBoards[boardSortedHash] = finalMove
+
+        return finalMove
     }
 }

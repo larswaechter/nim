@@ -13,7 +13,7 @@ class NimPerfect(
      * Do move and return new game
      *
      * @param move [Move] Move to do
-     * @return NimGame
+     * @return new game with applied move
      */
     override fun move(move: Move): NimGame {
         assert(!this.isGameOver())
@@ -29,7 +29,7 @@ class NimPerfect(
      * Undo a number of moves
      *
      * @param number [Int] Number of moves to undo
-     * @return NimGame
+     * @return new game with undone moves
      */
     override fun undoMove(number: Int): NimGame {
         assert(number < this.history.size)
@@ -37,19 +37,32 @@ class NimPerfect(
         return NimPerfect(this.history[this.history.size - 1 - number], this.history.subList(0, this.history.size - number), nextPlayer)
     }
 
-    override fun bestMove(): Move {
-        val possibleMoves: List<Move> = this.getPossibleMoves()
-        var bestMove: Move
+    /**
+     * Get best possible move
+     * If player can not win we return a random move
+     *
+     * @return bestMove [Move] Best possible or random move
+     */
+    override fun bestMove(): Move = this.recBestMove()
 
-        // Search for best move if current position is winning position until next position is not winning position
-        do {
-            bestMove = possibleMoves.random()
-        } while (NimPerfect.isWinningPosition(this.board) && NimPerfect.isWinningPosition(this.move(bestMove).board))
-
-        return bestMove
+    /**
+     * See bestMove()
+     *
+     * @param moves [List<Move>] Possible moves
+     * @return bestMove [Move] Best possible or random move
+     */
+    private tailrec fun recBestMove(moves: List<Move> = this.getPossibleMoves()): Move {
+        val move: Move = moves.random()
+        val isGoodMove: Boolean = isWinningPosition(this.board) && !isWinningPosition(this.move(move).board)
+        return if (!isWinningPosition(this.board) || isGoodMove) move else this.recBestMove(moves)
     }
 
-    fun getPossibleMoves(): List<Move> {
+    /**
+     * Get a list of all possible moves
+     *
+     * @return possible moves
+     */
+    private fun getPossibleMoves(): List<Move> {
         val possibleMoves: MutableList<Move> = mutableListOf()
 
         for (rowIdx in this.board.indices) {
