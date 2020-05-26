@@ -1,5 +1,8 @@
 package nim
 
+/**
+ * Interface for Nim
+ */
 interface NimGame {
     // Game board
     val board: IntArray
@@ -17,10 +20,10 @@ interface NimGame {
     fun isGameOver(): Boolean = this.board.none { n -> n > 0 }
 
     /**
-     * If the game is over, the player whose turn not is, has won
+     * If the game is over, the player whose turn not is has won
      * since this player did the last / finishing move.
      *
-     * @return Player of the game
+     * @return winner of the game
      */
     fun getWinner(): Int {
         assert(this.isGameOver())

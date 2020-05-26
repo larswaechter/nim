@@ -61,7 +61,7 @@ class Nim(
 
         // Evaluate move
         val newGame = this.move(possibleMoves.first())
-        val score = this.minimax(game = newGame as Minimax<NimGame, Move>, maximize = newGame.currentPlayer == 1)
+        val score = this.minimax(game = newGame as Minimax<NimGame, Move>)
 
         // The move is a good one if the following player's move is a bad one
         if (!score.third) return this.recBestMove(possibleMoves.drop(1), winMoves.plus(possibleMoves.first()))
@@ -105,7 +105,7 @@ class Nim(
 
     override fun toString(): String {
         var res: String = ""
-        this.board.forEach { res += "\n" + "I ".repeat(it) }
-        return res;
+        this.board.forEachIndexed {index, i -> res += "\n (${index+1})\t" + "I ".repeat(i) }
+        return res
     }
 }

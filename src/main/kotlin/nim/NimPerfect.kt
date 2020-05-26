@@ -83,7 +83,7 @@ class NimPerfect(
 
     override fun toString(): String {
         var res: String = ""
-        this.board.forEach { res += "\n" + "I ".repeat(it) }
-        return res;
+        this.board.forEachIndexed {index, i -> res += "\n (${index+1})\t" + "I ".repeat(i) }
+        return res
     }
 }

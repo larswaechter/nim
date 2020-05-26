@@ -4,6 +4,7 @@ import kotlin.math.abs
 
 /**
  * Interface for implementing Minimax algorithm in two-player zero-sum games
+ *
  * @param [Game] the type of a game
  * @param [Move] the type of a move
  */
@@ -12,6 +13,11 @@ interface Minimax<Game, Move> {
      * Game board
      */
     val board: IntArray
+
+    /**
+     * Current player
+     */
+    val currentPlayer: Int
 
     /**
      * Evaluate game state for current player.
@@ -71,7 +77,7 @@ interface Minimax<Game, Move> {
     fun minimax(
             game: Minimax<Game, Move>,
             depth: Int = this.getPossibleMoves().size,
-            maximize: Boolean = true,
+            maximize: Boolean = game.currentPlayer == 1,
             storedBoards: HashMap<Int, Triple<Move?, Float, Boolean>> = HashMap()
     ): Triple<Move?, Float, Boolean> {
 
