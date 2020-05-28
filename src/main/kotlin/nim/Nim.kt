@@ -20,7 +20,7 @@ class Nim(
      */
     override fun move(move: Move): NimGame {
         assert(!this.isGameOver())
-        assert(move.row < this.board.size && move.amount <= this.board[move.row])
+        assert(move.row >= 0 && move.row < this.board.size && move.amount > 0 && move.amount <= this.board[move.row])
 
         val board = this.board.clone()
         board[move.row] -= move.amount
@@ -55,7 +55,7 @@ class Nim(
      * @param [winMoves] list of moves that guarantee a win
      * @return best possible or random move
      */
-    private tailrec fun recBestMove(possibleMoves: List<Move> = this.getPossibleMoves(), winMoves: List<Move> = listOf()): Move {
+    private fun recBestMove(possibleMoves: List<Move> = this.getPossibleMoves(), winMoves: List<Move> = listOf()): Move {
         // Recursion anchor -> Return bestMove or a random one
         if (possibleMoves.isEmpty()) return if (winMoves.isNotEmpty()) winMoves.random() else this.getRandomMove()
 
@@ -89,7 +89,6 @@ class Nim(
 
     /**
      * Evaluate current game board for Minimax algorithm
-     * If we have a winning position / best move we return a random value to get a random best move later on
      *
      * @param [depth] current tree depth
      * @return score of board
@@ -104,8 +103,8 @@ class Nim(
     override fun isGameOver(): Boolean = this.board.none { n -> n > 0 }
 
     override fun toString(): String {
-        var res: String = ""
-        this.board.forEachIndexed {index, i -> res += "\n (${index+1})\t" + "I ".repeat(i) }
-        return res
+        var s = ""
+        this.board.forEachIndexed { index, i -> s += "\n (${index + 1})\t" + "I ".repeat(i) }
+        return s
     }
 }

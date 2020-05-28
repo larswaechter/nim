@@ -84,16 +84,15 @@ interface Minimax<Game, Move> {
         // Recursion anchor -> Evaluate board
         if (depth == 0 || game.isGameOver()) return Triple(null, game.evaluate(depth).toFloat(), false)
 
-        // Check if board exists in storage
-        val boardSorted: IntArray = game.board.sortedArray()
-        val boardSortedHash: Int = boardSorted.contentHashCode()
+        val boardSortedHash: Int = game.board.sortedArray().contentHashCode()
 
+        // Check if board exists in storage
         if (storedBoards.containsKey(boardSortedHash)) {
             val storedBoard = storedBoards[boardSortedHash]!!
             val scoreAbs: Float = abs(storedBoard.second)
             val newScore: Float
 
-            // Was best move for storedBoard a good one or not? -> Transform score for current player
+            // Was move for storedBoard a good one or not? -> Transform score for current player
             if (storedBoard.third) newScore = if (maximize) scoreAbs else -scoreAbs
             else newScore = if (maximize) -scoreAbs else scoreAbs
 
@@ -105,9 +104,9 @@ interface Minimax<Game, Move> {
 
         for (move in game.getPossibleMoves()) {
             // Apply move - We have to cast here since NimGame prescribes the return type NimGame
-            val newGame: Minimax<Game, Move> = game.move(move) as Minimax<Game, Move>
+            val newGame = game.move(move) as Minimax<Game, Move>
 
-            val moveScore: Float = this.minimax(newGame, depth - 1, !maximize, storedBoards).second
+            val moveScore = this.minimax(newGame, depth - 1, !maximize, storedBoards).second
             val score: Pair<Move?, Float> = Pair(move, moveScore)
 
             // Check for maximum or minimum
@@ -119,6 +118,7 @@ interface Minimax<Game, Move> {
         val wasGoodMove = (maximize && minOrMax.second > 0) || (!maximize && minOrMax.second < 0)
         val finalMove = Triple(minOrMax.first, minOrMax.second, wasGoodMove)
 
+        // Store move
         storedBoards[boardSortedHash] = finalMove
 
         return finalMove

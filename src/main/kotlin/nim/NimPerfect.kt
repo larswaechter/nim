@@ -13,7 +13,13 @@ class NimPerfect(
         override val currentPlayer: Int = 1) : NimGame {
 
     companion object {
-        fun isWinningPosition(map: IntArray): Boolean = map.fold(0) { i, j -> i.xor(j) } != 0
+        /**
+         * Check if given board is a winning position for current player
+         *
+         * @param [board] board to evaluate
+         * @return whether it's a winning position or not
+         */
+        fun isWinningPosition(board: IntArray): Boolean = board.fold(0) { i, j -> i.xor(j) } != 0
     }
 
     /**
@@ -24,7 +30,7 @@ class NimPerfect(
      */
     override fun move(move: Move): NimGame {
         assert(!this.isGameOver())
-        assert(move.row < this.board.size && move.amount <= this.board[move.row])
+        assert(move.row >= 0 && move.row < this.board.size && move.amount > 0 && move.amount <= this.board[move.row])
 
         val board = this.board.clone()
         board[move.row] -= move.amount
@@ -58,7 +64,7 @@ class NimPerfect(
      * @param [moves] possible moves
      * @return [bestMove] possible or random move
      */
-    private tailrec fun recBestMove(moves: List<Move> = this.getPossibleMoves()): Move {
+    private fun recBestMove(moves: List<Move> = this.getPossibleMoves()): Move {
         val move: Move = moves.random()
         val isGoodMove: Boolean = isWinningPosition(this.board) && !isWinningPosition(this.move(move).board)
         return if (!isWinningPosition(this.board) || isGoodMove) move else this.recBestMove(moves)
@@ -82,8 +88,8 @@ class NimPerfect(
     }
 
     override fun toString(): String {
-        var res: String = ""
-        this.board.forEachIndexed {index, i -> res += "\n (${index+1})\t" + "I ".repeat(i) }
-        return res
+        var s = ""
+        this.board.forEachIndexed { index, i -> s += "\n (${index + 1})\t" + "I ".repeat(i) }
+        return s
     }
 }
