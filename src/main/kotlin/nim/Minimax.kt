@@ -84,12 +84,12 @@ interface Minimax<Game, Move> {
         // Recursion anchor -> Evaluate board
         if (depth == 0 || game.isGameOver()) return Triple(null, game.evaluate(depth).toFloat(), false)
 
-        val boardSortedHash: Int = game.board.sortedArray().contentHashCode()
+        val boardSortedHash = game.board.sortedArray().contentHashCode()
 
         // Check if board exists in storage
         if (storedBoards.containsKey(boardSortedHash)) {
             val storedBoard = storedBoards[boardSortedHash]!!
-            val scoreAbs: Float = abs(storedBoard.second)
+            val scoreAbs = abs(storedBoard.second)
             val newScore: Float
 
             // Was move for storedBoard a good one or not? -> Transform score for current player

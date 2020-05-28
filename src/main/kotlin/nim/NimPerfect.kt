@@ -56,18 +56,14 @@ class NimPerfect(
      *
      * @return [bestMove] best possible or random move
      */
-    override fun bestMove(): Move = this.recBestMove()
+    override fun bestMove(): Move {
+        val possibleMoves = this.getPossibleMoves()
+        if (!isWinningPosition(this.board)) return possibleMoves.random()
 
-    /**
-     * See bestMove()
-     *
-     * @param [moves] possible moves
-     * @return [bestMove] possible or random move
-     */
-    private fun recBestMove(moves: List<Move> = this.getPossibleMoves()): Move {
-        val move: Move = moves.random()
-        val isGoodMove: Boolean = isWinningPosition(this.board) && !isWinningPosition(this.move(move).board)
-        return if (!isWinningPosition(this.board) || isGoodMove) move else this.recBestMove(moves)
+        while (true) {
+            val move = possibleMoves.random()
+            if (!isWinningPosition(this.move(move).board)) return move
+        }
     }
 
     /**

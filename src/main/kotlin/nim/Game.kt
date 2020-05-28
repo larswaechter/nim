@@ -2,6 +2,9 @@ package nim
 
 import kotlin.random.Random
 
+/**
+ * Class for user interaction via command line
+ */
 class Game {
     init {
         this.start()
@@ -16,61 +19,113 @@ class Game {
         else if (action == "p") {
             val opponent = this.askOpponent()
             val board = this.askBoard()
-            val game: NimGame = if (opponent == "1") Nim(board) else NimPerfect(board)
+            val starter = this.askStarter()
+            val game: NimGame = if (opponent == "1") Nim(board = board, currentPlayer = starter) else NimPerfect(board = board, currentPlayer = starter)
             this.play(game)
         }
     }
 
     /**
-     * Ask user for action
+     * Ask user for an action
      * Play or test
+     *
+     * @return action
      */
     private fun askAction(): String {
         while (true) {
             print("\nWelcome, what do you want to do?\nPlay (p) or run tests (t): ")
-            val input = readLine()!!
-            if (input.matches(Regex("[pt]"))) return input
+            val userInput = readLine()!!
+            if (userInput.matches(Regex("[pt]"))) return userInput
         }
     }
 
     /**
-     * Ask user for opponent
+     * Ask user for an opponent
      * Nim or NimPerfect
+     *
+     * @return opponent
      */
     private fun askOpponent(): String {
         while (true) {
             print("\nChoose your opponent\nNim (1) or NimPerfect (2): ")
-            val input = readLine()!!
-            if (input.matches(Regex("[12]"))) return input
+            val userInput = readLine()!!
+            if (userInput.matches(Regex("[12]"))) return userInput
         }
     }
 
     /**
-     * Ask user for board
+     * Ask user for a board
+     *
+     * @return board
      */
     private fun askBoard(): IntArray {
         while (true) {
-            print("\nEnter sticks per row (Default: 3-4-5) or create a random board (r): ")
-            val boardInput = readLine()!!
-            if (boardInput.isNotEmpty()) {
-                if (boardInput == "r") {
-                    println("\nGenerating random board...")
+            print("\nEnter sticks per row (e.g.: 2-2-4) or create a random board (r)\nLeave empty to use the default board (3-4-5): ")
+            val userInput = readLine()!!
+            if (userInput.isNotEmpty()) {
+                if (userInput == "r") {
+                    println("\nCreating random board...")
                     return this.generateRandomBoard()
                 }
                 // Allow 2-5 rows with 1-7 sticks
-                else if (boardInput.matches(Regex("^[1-7]+(-[1-7]+){1,4}\$"))) {
-                    val sticksPerRow = boardInput.split("-")
+                else if (userInput.matches(Regex("^[1-7]+(-[1-7]+){1,4}\$"))) {
+                    println("\nCreating board $userInput...")
+                    val sticksPerRow = userInput.split("-")
                     return sticksPerRow.map() { it.toInt() }.toIntArray()
                 } else {
                     println("Invalid board!")
                 }
                 // Default board
-            } else return intArrayOf(3, 4, 5);
+            } else {
+                println("\nCreating default board...")
+                return intArrayOf(3, 4, 5)
+            }
         }
     }
 
     /**
-     * Ask user for move
+     * Ask user for a starting player
+     * User or computer
+     *
+     * @return starting player
+     */
+    private fun askStarter(): Int {
+        while (true) {
+            print("\nWho should start? You (1) or the computer (2): ")
+            val userInput = readLine()!!
+            if (userInput.matches(Regex("[12]"))) return if (userInput == "1") 1 else -1
+        }
+    }
+
+    /**
+     * Ask user what he want's to do in his turn
+     *
+     * @param [game]
+     * @return game with applied user's turn
+     */
+    private fun askTurn(game: NimGame): NimGame {
+        while (true) {
+            print("It's your turn, who should play your move?\nYou (1) or the computer (2) or undo a move (3): ")
+            val userInput = readLine()!!
+            if (userInput.matches(Regex("[123]"))) {
+                when (userInput) {
+                    // Human
+                    "1" -> return game.move(this.askMove(game))
+                    // Computer
+                    "2" -> {
+                        val move = game.bestMove()
+                        println("\nOkay, the computer is playing for you: $move")
+                        return game.move(move)
+                    }
+                    // Undo
+                    "3" -> return askUndoMoves(game)
+                }
+            }
+        }
+    }
+
+    /**
+     * Ask user to enter a move
      *
      * @param [game] game that handles the move
      * @return move to play
@@ -92,10 +147,16 @@ class Game {
 
     /**
      * Ask user to undo moves
+     *
      * @param [game] game that undoes the moves
      * @return game with undone moves
      */
     private fun askUndoMoves(game: NimGame): NimGame {
+        if (game.history.size == 1) {
+            println("\nYou can not undo a move. No move was played yet.")
+            return game
+        }
+
         while (true) {
             print("\nHow many moves do you want do undo? (0-${game.history.size - 1}): ")
             val input = readLine()!!
@@ -114,7 +175,7 @@ class Game {
     private fun play(initialGame: NimGame) {
         var game = initialGame
 
-        println("\nLet's start!")
+        println("\nLet's start! ${if (game.currentPlayer == 1) "You begin." else "The computer begins."}")
         println(game)
 
         while (true) {
@@ -128,6 +189,7 @@ class Game {
                 val action = readLine()!!
                 if (action.isEmpty()) {
                     this.start()
+                    break
                 } else if (action == "u") {
                     game = askUndoMoves(game)
                     println(game)
@@ -135,22 +197,9 @@ class Game {
 
                 // Game running
             } else {
-                // Human player
+                // 1 = Human Player; -1 = Computer
                 if (game.currentPlayer == 1) {
-                    print("It's your turn, who should play your move?\nYou (1) or NPC (2) or undo a move (3): ")
-                    when (readLine()!!) {
-                        // Human
-                        "1" -> game = game.move(this.askMove(game))
-                        // NPC
-                        "2" -> {
-                            val move = game.bestMove()
-                            game = game.move(move)
-                            println("\nOkay, the NPC is playing for you: $move")
-                        }
-                        // Undo
-                        "3" -> game = askUndoMoves(game)
-                    }
-                    // Opponent is moving
+                    game = this.askTurn(game)
                 } else {
                     val move = game.bestMove()
                     game = game.move(move)
