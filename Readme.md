@@ -1,7 +1,5 @@
 # Nim
 
-Lars Wächter - 5280456
-
 ## Anleitung
 
 ### 1. Hauptmenü
