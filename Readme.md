@@ -1,5 +1,11 @@
 # Nim
 
+Nim game built with Kotlin (German)
+
+- Author: Lars Wächter
+- Subject: Programmierung interaktiver Systeme / Programming of interactive systems
+- University: Technische Hochschule Mittelhessen (SoSe 2020)
+
 ## Anleitung
 
 ### 1. Hauptmenü
